@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "title": "BBC LIMITED",
+      "address": {
+        "premises": "Boswell Cottage Main Street",
+        "country": "England",
+        "locality": "Retford",
+        "postal_code": "DN22 0AD",
+        "address_line_1": "North Leverton"
+      },
+      "officers": [],
+      "company_number": "06500244",
+      "company_type": "ltd",
+      "company_status": "active",
+      "date_of_creation": [
+        2008,
+        2,
+        11
+      ]
+    }
+  ],
+  "total_results": 1
+}
