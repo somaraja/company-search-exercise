@@ -26,18 +26,18 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.risknarrative.spring.exercise.util.TestUtil.*;
+import static com.risknarrative.spring.exercise.util.TestDataUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableWireMock({
-        @ConfigureWireMock(name = "companyservice", properties = "base.url")
+        @ConfigureWireMock(name = "company_service", properties = "base.url")
 })
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class CompanyControllerTest {
 
-    @InjectWireMock("companyservice")
+    @InjectWireMock("company_service")
     private WireMockServer wiremock;
 
     @Autowired
@@ -48,6 +48,10 @@ class CompanyControllerTest {
 
     @BeforeEach
     void setUp() {
+        if(!wiremock.isRunning()) {
+            wiremock.start();
+        }
+
         wiremock.stubFor(get("/Search?Query=BBC").willReturn(aResponse()
                 .withHeader("Content-Type", APPLICATION_JSON)
                 .withBody(COMPANY_RESULTS)));
@@ -133,5 +137,16 @@ class CompanyControllerTest {
         final ResponseEntity<SearchResponse> responseEntity = restTemplate.exchange("/api?active=false", HttpMethod.POST, entity, SearchResponse.class);
         assertNotNull(responseEntity);
         assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void testServerErrorWhenApiDown() {
+        if(wiremock.isRunning()) {
+            wiremock.stop();
+        }
+
+        final HttpEntity<SearchRequest> entity = getHttpEntity(COMPANY_NAME,COMPANY_NUMBER);
+        ResponseEntity<SearchResponse> responseEntity = restTemplate.exchange("/search?active=true", HttpMethod.POST, entity, SearchResponse.class);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
     }
 }
